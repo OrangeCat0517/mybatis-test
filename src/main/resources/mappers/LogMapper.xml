@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatis.mapper.LogMapper">
+    <resultMap id="logResultMap" type="Log">
+        <id property="id" column="l_id"/>
+        <result property="loginTime" column="login_time"/>
+        <!--一个实体中包含另一个实体的时候，应该考虑使用association-->
+        <association property="user" column="user_id" jdbcType="INTEGER" javaType="User">
+            <id property="id" column="u_id" javaType="int" jdbcType="INTEGER"
+                typeHandler="org.apache.ibatis.type.IntegerTypeHandler"/>
+            <result property="email" column="email" />
+            <result property="password" column="password" />
+            <result property="birthday" column="birthday" jdbcType="DATE" javaType="java.time.LocalDate"
+                    typeHandler="org.apache.ibatis.type.LocalDateTypeHandler"/>
+            <result property="sex" column="sex" />
+            <result property="loginCount" column="login_count" />
+            <result property="lastLoginTime" column="last_login_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+                    typeHandler="org.apache.ibatis.type.LocalDateTimeTypeHandler"/>
+        </association>
+    </resultMap>
+    <select id="findByUserId" resultMap="logResultMap" parameterType="int">
+        select l.id l_id, login_time, user_id, u.id u_id, email, password, birthday, sex, login_count, last_login_time
+        from logs l inner join users u on l.user_id = u.id where l.user_id = #{userId}
+    </select>
+
+    <insert id="save">
+        insert into logs(login_time, user_id) values (#{l}, #{i})
+    </insert>
+</mapper>

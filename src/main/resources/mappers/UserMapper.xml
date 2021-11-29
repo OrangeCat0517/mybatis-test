@@ -4,40 +4,73 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <!--namespace后面写的是这个映射文件对应接口的包和接口名-->
 <mapper namespace="com.example.mybatis.mapper.UserMapper">
+<cache type="com.example.mybatis.cache.RedisCache"/>
 <!--接口中有几个方法这里就要放几个对应的<select><insert><update><delete>-->
 <!--id是方法的名字, parameterType是对应方法中参数的类型-->
 <!--只有查询操作可以写返回类型，其余增删改不需要写返回类型-->
     <!--#{id}就类似与以前JDBC中的占位符?-->
     <!--#{loginCount}此处的名字必须和实体中的属性名一致-->
-    <resultMap id="userResultMap" type="com.example.mybatis.domain.User">
+    <resultMap id="userResultMap" type="User">
         <!--resultMap的作用是将实体的属性名和数据库列名对应到一起-->
         <!--id表示主键，result表示普通列-->
         <!--property表示实体中属性的名字，column表示列名-->
-        <id property="id" column="id"/>
+        <id property="id" column="id" javaType="int" jdbcType="INTEGER"
+            typeHandler="org.apache.ibatis.type.IntegerTypeHandler"/>
         <result property="email" column="email" />
         <result property="password" column="password" />
-        <result property="birthday" column="birthday" />
+        <result property="birthday" column="birthday" jdbcType="DATE" javaType="java.time.LocalDate"
+                typeHandler="org.apache.ibatis.type.LocalDateTypeHandler"/>
         <result property="sex" column="sex" />
         <result property="loginCount" column="login_count" />
-        <result property="lastLoginTime" column="last_login_time" />
+        <result property="lastLoginTime" column="last_login_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+                typeHandler="org.apache.ibatis.type.LocalDateTimeTypeHandler"/>
     </resultMap>
-    <insert id="save" parameterType="com.example.mybatis.domain.User">
-        insert into users(email, password, birthday, sex, login_count, last_login_time) values (#{email}, #{password},  #{birthday},  #{sex},  #{loginCount},  #{lastLoginTime})
+
+    <sql id="userColumns">id, email, password, birthday, sex, login_count, last_login_time</sql>
+    <sql id="userColumnsNoId">email, password, birthday, sex, login_count, last_login_time</sql>
+
+    <insert id="save" parameterType="User" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into users(<include refid="userColumnsNoId"/>)
+        values (#{email}, #{password},  #{birthday, javaType=java.time.LocalDate, jdbcType=DATE, typeHandler=org.apache.ibatis.type.LocalDateTypeHandler},  #{sex},  #{loginCount},  #{lastLoginTime})
     </insert>
 
-    <delete id="deleteById" parameterType="java.lang.Integer">
+    <delete id="deleteById" parameterType="_int">
         delete from users where id=#{id}
     </delete>
 
-    <update id="updateById" parameterType="com.example.mybatis.domain.User">
-        update users set email=#{email}, password=#{password}, birthday=#{birthday}, sex=#{sex}, login_count=#{loginCount}, last_login_time=#{lastLoginTime} where id = #{id}
+    <update id="updateById" parameterType="User">
+        update users
+        <set>
+            <if test="email!=null">email=#{email},</if>
+            <if test="password!=null">password=#{password},</if>
+            <if test="birthday!=null">birthday=#{birthday},</if>
+            <if test="sex!=null">sex=#{sex},</if>
+            <if test="loginCount!=null">login_count=#{loginCount},</if>
+            <if test="lastLoginTime!=null">last_login_time=#{lastLoginTime},</if>
+        </set>
+        where id = #{id}
     </update>
 
-    <select id="findOne" parameterType="java.lang.Integer" resultMap="userResultMap">
-        select id, email, password, birthday, sex, login_count, last_login_time from users where id=#{id}
+    <select id="findOne" parameterType="int" resultMap="userResultMap">
+        select <include refid="userColumns"/> from users where id=#{id}
     </select>
 
     <select id="findAll" resultMap="userResultMap">
-        select id, email, password, birthday, sex, login_count, last_login_time from users
+        select <include refid="userColumns"/> from users
+    </select>
+
+    <select id="findByConditon" resultMap="userResultMap">
+        select * from users
+        <trim prefix="where" prefixOverrides="AND|OR">
+            <if test="id!=null">
+                and id = #{id}
+            </if>
+            <if test="email!=null">
+                and email=#{email}
+            </if>
+            <if test="loginCount!=null">
+                and login_count=#{loginCount}
+            </if>
+        </trim>
     </select>
 </mapper>
