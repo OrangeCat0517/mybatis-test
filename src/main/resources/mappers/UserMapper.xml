@@ -73,4 +73,9 @@
             </if>
         </trim>
     </select>
+
+    <select id="findByEmail" resultMap="userResultMap">
+        <bind name="pattern" value="'%' + _parameter.email + '%'" />
+        select * from users where email like #{pattern};
+    </select>
 </mapper>

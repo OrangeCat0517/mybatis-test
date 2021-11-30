@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,5 +40,10 @@ class LogMapperTest {
     @Test
     void findByUserId() {
         logMapper.findByUserId(3).forEach(System.out::println);
+    }
+
+    @Test
+    void xxx() {
+        logMapper.findByIds(List.of(1,2,4)).forEach(System.out::println);
     }
 }

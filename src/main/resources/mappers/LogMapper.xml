@@ -28,4 +28,11 @@
     <insert id="save">
         insert into logs(login_time, user_id) values (#{l}, #{i})
     </insert>
+    
+    <select id="findByIds" resultMap="logResultMap">
+        select * from logs where id in
+        <foreach item="i" collection="ids" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+    </select>
 </mapper>

@@ -9,4 +9,5 @@ import java.util.List;
 public interface LogMapper {
     int save(@Param("l") LocalDateTime loginTime, @Param("i") Integer userId);
     List<Log> findByUserId(Integer userId);
+    List<Log> findByIds(@Param("ids") List<Integer> ids);
 }

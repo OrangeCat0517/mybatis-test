@@ -94,4 +94,9 @@ class UserMapperTest {
         userSearch.setEmail("jerry@google.com");
         userMapper.findByConditon(userSearch).forEach(System.out::println);
     }
+
+    @Test
+    void xx() {
+        userMapper.findByEmail("jerry").forEach(System.out::println);
+    }
 }
